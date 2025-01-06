@@ -1,13 +1,16 @@
-from .iu_components import * 
+
 from .map import * 
 
 from matplotlib import pyplot as plt 
+from matplotlib.widgets import Slider, TextBox
 
 
 def plot(umap:Map): 
     
     # Get data 
-    x_elevation, y_elevation, elevation = umap.elevation.xyz
+    if umap.topography: 
+        x_elevation, y_elevation, elevation = umap.elevation.xyz
+        
     buildings_gdfs = umap.buildings_gdfs
     edges, nodes = umap.road_network.edges, umap.road_network.nodes
     special_data = umap.special_data
@@ -16,7 +19,8 @@ def plot(umap:Map):
     fig, ax = plt.subplots(figsize=(15, 15))
 
     # Create filled contour plot
-    contours = plt.contourf(x_elevation, y_elevation, elevation, cmap="terrain", alpha=0.5, levels=20)  
+    if umap.topography: 
+        contours = plt.contourf(x_elevation, y_elevation, elevation, cmap="terrain", alpha=0.5, levels=20)  
 
     # Plot water 
     if "water" in special_data.keys(): 
@@ -37,8 +41,9 @@ def plot(umap:Map):
     nodes.plot(ax=ax, color="red", markersize=4, label="Nodes")
 
     # Add colorbar
-    cbar = plt.colorbar(contours)
-    cbar.set_label("Elevation (meters)")
+    if umap.topography: 
+        cbar = plt.colorbar(contours)
+        cbar.set_label("Elevation (meters)")
 
     # Add title and axis labels
     ax.set_title("debug", fontsize=16)

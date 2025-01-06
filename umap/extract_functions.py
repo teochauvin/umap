@@ -49,6 +49,8 @@ def get_buildings_dataframe(
     # Find a better way to simplify polygons 
     merged_gdfs["geometry"] = merged_gdfs["geometry"].simplify(tolerance=1e-5, preserve_topology=True)
 
+    print("Geometry data collected from Open Street Map.")
+
     return merged_gdfs 
 
 
@@ -90,6 +92,8 @@ def get_topography(
         with open(f"save/topography_{filename}.tif", "wb") as f:
             f.write(response.content)
 
+        print("Topograpy data collected from Open Topography.")
+
     else:
         print(f"Error: {response.status_code}, {response.text}")
 
@@ -128,9 +132,8 @@ def get_network(reference_point:MapPoint, buffer_distance:float):
 
     # Get the graph 
     G = ox.graph_from_polygon(area, network_type="drive")
-    nodes, edges = ox.graph_to_gdfs(G)
 
-    return edges, nodes, G
+    return G
 
 
 def get_water(reference_point:MapPoint, buffer_distance:float) -> gpd.GeoDataFrame: 
@@ -226,7 +229,7 @@ def assign_heights(buildings_gdf, default_height=20):
         buildings_gdf.loc[:, "height"] = default_height
 
     # Replace NaN values in height with the default value
-    buildings_gdf["height"] = buildings_gdf["height"].fillna(default_height)
+    buildings_gdf["height"] = buildings_gdf["height"].fillna(default_height).infer_objects(copy=False)
 
     # Remove NaN values from 'height' column and group by height (should never happen) 
     buildings_gdf = buildings_gdf.dropna(subset=['height'])
