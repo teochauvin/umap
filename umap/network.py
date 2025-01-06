@@ -1,5 +1,6 @@
 import geopandas as gpd 
 import osmnx as ox
+import numpy as np 
 
 class Network: 
     """ DOCME """
@@ -10,6 +11,11 @@ class Network:
         self.adj = adj 
         self.edges = edges
         self.nodes = nodes 
+        self.list_extremal_nodes:np.ndarray = [] 
+
+        # Init 
+        self.set_extremal_nodes()
+
 
     def __repr__(self):
         return f"{self.edges.columns}, {self.nodes.columns}"
@@ -19,8 +25,6 @@ class Network:
         """ Returns the pythonic graph. """
 
         nodes, edges = ox.graph_to_gdfs(G)
-        print(nodes)
-        #u, v, key = edges.index.get_level_values('u'), edges.index.get_level_values('v'), edges.index.get_level_values('key')
 
         adj = {}
         vertices = {}
@@ -28,10 +32,30 @@ class Network:
         # Iterate over the edges and add (u, v) pairs to the dictionary
         for (u, v, key), row in edges.iterrows():
             adj.setdefault(u, []).append(v) 
+            adj.setdefault(v, []).append(u) 
 
-        for id,row in edges.iterrows():
-            vertices.setdefault(id, []).append(row["geometry"].wkt)
+        for id,row in nodes.iterrows():
+            vertices[id] = row["geometry"]
 
         return cls(nodes, edges, vertices, adj, G) 
     
-    # getters 
+    
+    def set_extremal_nodes(self) -> None: 
+        """ 
+            Set the extremal nodes. 
+            Extremal nodes are nodes that can be start or end points flows. 
+        """
+
+        extremal_node = [] 
+
+        for (u,v_list) in self.adj.items(): 
+
+            # The point 
+            p = self.vertices[u]
+
+            # Nodes that have only one neighbor 
+            if len(v_list) <= 2: 
+                extremal_node.append([p.x, p.y])
+
+
+        self.list_extremal_nodes = np.asarray(extremal_node)

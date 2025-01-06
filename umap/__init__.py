@@ -5,6 +5,7 @@
 from .extract_functions import * 
 from .map import Map
 from .visualisation import plot
+from .plan import Plan 
 
 all = [
     "Map", 

@@ -1,5 +1,4 @@
 
-
 class MapPoint: 
     """ A point is defined as a (lat, lon) tuple. """
 

@@ -7,7 +7,6 @@ import math
 import requests
 import rasterio 
 from rasterio.warp import calculate_default_transform, reproject, Resampling
-from pyproj import Proj, transform
 
 from .coordinates import MapPoint
 

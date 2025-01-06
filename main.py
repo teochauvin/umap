@@ -12,7 +12,7 @@ if __name__ == "__main__":
         lon=1.4432166595189688, 
         lat=43.5910143632871)
     
-    """# lyon 45.774792, 4.832051
+    # lyon 45.774792, 4.832051
     name = "lyon"
     reference_point = MapPoint(
         lon=4.832051, 
@@ -30,7 +30,7 @@ if __name__ == "__main__":
         lon=1.479148, 
         lat=43.563971)
     
-    48.858234252317324, 2.2941945479347217
+    """48.858234252317324, 2.2941945479347217
     name = "eiffelTower"
     reference_point = MapPoint(
         lon=2.2941945479347217,
@@ -40,16 +40,17 @@ if __name__ == "__main__":
     
     
     # Isnitialize map 
-    umap = Map.init_from_request(reference_point, buffer_distance=1000.0, name=name) 
+    umap = Map.init_from_request(reference_point, buffer_distance=1000.0, name=name, topography=True) 
 
     # Export map 
     umap.save()
 
     # Load a file
-    # new_umap = Map.load(name)
+    umap:Map = Map.load(name)
 
-    # Get graph data
-    # vertices, adj = umap.road_network.vertices, umap.road_network.adj
+    # Build missions 
+    plans = Plan.init_poisson_flow(K_uavs=100, flow=1.0, extremal_points=umap.road_network.list_extremal_nodes)
+    print(plans)
 
     # Visualize map 
     plot(umap)

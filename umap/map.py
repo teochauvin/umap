@@ -4,7 +4,6 @@ from .building import Building
 from .elevation import Elevation
 from .network import Network
 
-import h5py
 import pickle
 
 class Map: 
@@ -61,7 +60,8 @@ class Map:
         G = get_network(reference_point, buffer_distance)
 
         # The list of buidlings 
-        for _, building in buildings_gdfs.iterrows():  # Iterate through rows of each GeoDataFrame
+        for _, building in buildings_gdfs.iterrows():  
+            # Iterate through rows of each GeoDataFrame
             # Create a Building object and append it to the list
             buildings.append(Building(building["geometry"], building["height"]))
 
@@ -101,7 +101,16 @@ class Map:
 
 
     def generate_flow(self): 
-        pass 
+        
+        # Randomly select k different extremal nodes (1 neighbor only) 
+
+        # You can build k(k-1)/2 flows 
+        # Randomly select N flows 
+
+        # Chose the flow density in UAVs/s for each flow 
+
+
+        pass
 
     def _compute_distance_with_elevation(self): 
         pass 
