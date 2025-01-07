@@ -17,16 +17,13 @@ def get_buildings_dataframe(
         reference_point:MapPoint, 
         buffer_distance:float=1000.0, 
         merge_distance:float = 5.0, 
-        default_height:float = 15.0) -> gpd.GeoDataFrame: 
-    """ Returns the raw dataframe of al buldings in the requested area. """
+        default_height:float = 15.0) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]: 
+    """ Returns the requested and raw dataframes of al buldings in the selected area. """
 
     lon, lat = reference_point.lon, reference_point.lat
     lat_min, lon_min = _meters_to_latlon(lat, lon, -buffer_distance)
     lat_max, lon_max = _meters_to_latlon(lat, lon, buffer_distance)
     area = box(lon_min, lat_min, lon_max, lat_max) 
-
-    """point = Point(reference_point.lon, reference_point.lat)
-    area = point.buffer(buffer_distance / 111320)""" # Approx. (see README.md : approx)
 
     # Retrieve buildings within the buffer
     buildings = ox.features_from_polygon(area, tags={"building": True})
@@ -37,6 +34,9 @@ def get_buildings_dataframe(
     # Convexify 
     merged_gdfs = convexify_polygons(merged_gdfs)
 
+    # Save raw data 
+    raw_gdfs = merged_gdfs.copy() 
+
     # Merge nearby buildings
     merged_gdfs = merge_nearby_buildings(merged_gdfs, merge_distance)
 
@@ -45,12 +45,12 @@ def get_buildings_dataframe(
 
     # Simpligy geometry 
     # Add the tolerance to the function parameters 
-    # Find a better way to simplify polygons 
+    # TODO: Find a better way to simplify polygons 
     merged_gdfs["geometry"] = merged_gdfs["geometry"].simplify(tolerance=1e-5, preserve_topology=True)
 
     print("Geometry data collected from Open Street Map.")
 
-    return merged_gdfs 
+    return merged_gdfs, raw_gdfs
 
 
 def get_topography(

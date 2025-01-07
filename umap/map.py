@@ -14,6 +14,7 @@ class Map:
             reference_point:MapPoint, 
             buffer_distance:float, 
             buildings_gdfs:gpd.GeoDataFrame, 
+            original_gdfs:gpd.GeoDataFrame,
             buildings:list[Building], 
             elevation:Elevation, 
             network:Network, 
@@ -30,6 +31,9 @@ class Map:
 
         # Map assets 
         self.buildings_gdfs:gpd.GeoDataFrame = buildings_gdfs
+        self.raw_buildings_gdfs:gpd.GeoDataFrame = original_gdfs  
+        self.inflated_buildings_gdfs:gpd.GeoDataFrame = buildings_gdfs
+
         self.buildings:list[Building] = buildings
         self.elevation:Elevation = elevation 
         self.road_network:Network = network 
@@ -54,7 +58,7 @@ class Map:
         special_data = {} 
 
         # Get buildings from OSM
-        buildings_gdfs = get_buildings_dataframe(reference_point, buffer_distance) 
+        buildings_gdfs, raw_gdfs = get_buildings_dataframe(reference_point, buffer_distance) 
 
         # Road network
         G = get_network(reference_point, buffer_distance)
@@ -79,7 +83,7 @@ class Map:
         # Water bodies (special data)
         special_data["water"] = get_water(reference_point, buffer_distance)
   
-        return cls(reference_point, buffer_distance, buildings_gdfs, buildings, elevation, network, special_data, name, topography)
+        return cls(reference_point, buffer_distance, buildings_gdfs, raw_gdfs, buildings, elevation, network, special_data, name, topography)
 
     @classmethod
     def load(cls, filename:str):
@@ -96,21 +100,35 @@ class Map:
         print("Map saved.")
     
     
+    def update_merging_threshold(self, new_merge_thr:float) -> None: 
+        """ 
+            Update the geodataframe of building shapes regarding 
+            a new merging threshold applied to the raw geodataframe data.
+        """
 
+        self.buildings_gdfs = merge_nearby_buildings(self.raw_buildings_gdfs, new_merge_thr)
+        self.buildings_gdfs = remove_holes_from_gdf(self.buildings_gdfs) 
 
+    def compute_inflated_gfs(self, inflate:float):
+        """ Modifies the inflated geodataframe. """
 
+        # Reproject to a projected CRS 
+        gdf_projected = self.raw_buildings_gdfs.to_crs(epsg=3395)
 
-    def generate_flow(self): 
-        
-        # Randomly select k different extremal nodes (1 neighbor only) 
+        # Now apply the buffer (inflating by 100 meters)
+        gdf_projected['geometry'] = gdf_projected['geometry'].buffer(inflate)
 
-        # You can build k(k-1)/2 flows 
-        # Randomly select N flows 
+        # If you need to bring the data back to its original geographic CRS
+        gdf_projected = gdf_projected.to_crs(self.inflated_buildings_gdfs.crs)
 
-        # Chose the flow density in UAVs/s for each flow 
+        merged = gdf_projected.unary_union
 
+        merged_gdf = gpd.GeoDataFrame({'geometry': [merged]})
+        merged_gdf.crs = gdf_projected.crs 
 
-        pass
+        # Reproject back to the original CRS if needed
+        # Assuming original CRS is WGS84 (EPSG:4326)
+        self.inflated_buildings_gdfs = merged_gdf.to_crs(epsg=4326)  
 
     def _compute_distance_with_elevation(self): 
         pass 

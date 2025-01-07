@@ -19,16 +19,16 @@ if __name__ == "__main__":
         lat=45.774792)
     
     # paris 48.862928, 2.329298
-    name = "paris"
+    """name = "paris"
     reference_point = MapPoint(
         lon=2.329298, 
         lat=48.862928)
     
-    43.563971, 1.479148
+    # 43.563971, 1.479148
     name = "enac"
     reference_point = MapPoint(
         lon=1.479148, 
-        lat=43.563971)
+        lat=43.563971)"""
     
     """48.858234252317324, 2.2941945479347217
     name = "eiffelTower"
@@ -49,8 +49,8 @@ if __name__ == "__main__":
     umap:Map = Map.load(name)
 
     # Build missions 
+    # TODO: 1st version 
     plans = Plan.init_poisson_flow(K_uavs=100, flow=1.0, extremal_points=umap.road_network.list_extremal_nodes)
-    print(plans)
 
     # Visualize map 
     plot(umap)
