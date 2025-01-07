@@ -6,6 +6,27 @@ from matplotlib.widgets import Slider, TextBox, Button
 
 
 def plot(umap:Map): 
+
+
+    # Collection ids tracker 
+    # initilized at 
+    collection_ids = {
+        "inflated_buildings" : 1,
+        "buildings" : 2, 
+        "topography" : 0, 
+        "water" : 3, 
+        "edges_road_network" : 4, 
+        "nodes_road_network" : 5,
+        "extremal_points" : 6, 
+    }
+
+    # Button Events
+    visibility = {
+        "topography":True,
+        "buildings":True,
+        "water":True,
+        "road_network":True
+    }
     
     # Get data 
     if umap.topography: 
@@ -20,38 +41,60 @@ def plot(umap:Map):
 
     #  0  Create filled contour plot
     if umap.topography: 
-        contours = plt.contourf(x_elevation, y_elevation, elevation, cmap="terrain", alpha=0.5, levels=20) 
+        contours = plt.contourf(x_elevation, y_elevation, elevation, cmap="terrain", alpha=0.5, levels=20, zorder=collection_ids["topography"]) 
         cbar = plt.colorbar(contours, ax=ax)
         cbar.set_label("Elevation (meters)") 
 
-    #  1 PLot buildings 
+    #  1  Inflated buildings
+    inflated_building_plot = umap.inflated_buildings_gdfs.plot(
+        ax=ax,
+        alpha=0.4, 
+        facecolor="purple",
+        hatch="--",
+        zorder=collection_ids["inflated_buildings"]
+        )
+
+    #  2 PLot buildings 
     building_plot = umap.buildings_gdfs.plot(
         ax=ax,
         column="height",
         cmap="viridis",
         legend=True,
-        alpha=1.0,
         label="Buildings",
-        edgecolor="black")
+        edgecolor="black",
+        zorder=collection_ids["buildings"])
                                
-    #  2  Plot water 
+    #  3  Plot water 
     if "water" in special_data.keys(): 
-        special_data["water"].plot(ax=ax, color="blue", alpha=1.0, label="Water Bodies")
+        special_data["water"].plot(
+            ax=ax, 
+            color="blue", 
+            alpha=1.0, 
+            label="Water Bodies",
+            zorder=collection_ids["water"])
 
-    #  3  Plot road network (edges)
-    edge_plot = edges.plot(ax=ax, linewidth=1.5, edgecolor="black", label="Roads")
-    node_plot = nodes.plot(ax=ax, color="orange", markersize=4, label="Nodes")
-
-    #  4  Plot extremal nodes
-    extremal_plot = plt.scatter(extremal_nodes[:,0], extremal_nodes[:,1], s=10, color="red")
+    #  4-5  Plot road network (edges)
+    edge_plot = edges.plot(
+        ax=ax, 
+        linewidth=1.5, 
+        edgecolor="black", 
+        label="Roads", 
+        zorder=collection_ids["edges_road_network"])
     
-    #  6  Inflated buildings
-    inflated_building_plot = umap.inflated_buildings_gdfs.plot(
-        ax=ax,
-        alpha=0.4, 
-        facecolor="purple",
-        hatch="--"
-        )
+    node_plot = nodes.plot(
+        ax=ax, 
+        color="orange", 
+        markersize=4, 
+        label="Nodes", 
+        zorder=collection_ids["nodes_road_network"])
+
+    #  6  Plot extremal nodes
+    extremal_plot = plt.scatter(
+        extremal_nodes[:,0], 
+        extremal_nodes[:,1], 
+        s=10, 
+        color="red", 
+        zorder=collection_ids["extremal_points"])
 
     # Add title and axis labels
     ax.set_title(f"map : {umap.name}", fontsize=16)
@@ -60,25 +103,6 @@ def plot(umap:Map):
     ax.grid(True, linestyle="--", alpha=0.5)
 
 
-    # Collection ids tracker 
-    # initilized at 
-    collection_ids = {
-        "buildings" : 1, 
-        "topography" : 0, 
-        "water" : 2, 
-        "edges_road_network" : 3, 
-        "nodes_road_network" : 4,
-        "extremal_points" : 5, 
-        "inflated_buildings" : 6
-    }
-
-    # Button Events
-    visibility = {
-        "topography":True,
-        "buildings":True,
-        "water":True,
-        "road_network":True
-    }
 
     # Button callback function
     def toggle_buildings_visibility(event):
@@ -115,6 +139,8 @@ def plot(umap:Map):
         print("Map saved") 
 
 
+
+
     # connect buttons  
     button_ax = plt.axes([0.05, 0.05, 0.100, 0.035])  # x, y, width, height
     button = Button(button_ax, 'Buildings')
@@ -142,7 +168,7 @@ def plot(umap:Map):
     def merge_thr_update(val):
 
         # Update the buildings 
-        umap.compute_inflated_gfs(freq_slider.val)
+        umap.compute_inflated_gfs(float(val))
 
         # Remove previouse ones 
         ax.collections[collection_ids["inflated_buildings"]].remove() 
@@ -158,15 +184,34 @@ def plot(umap:Map):
             ax=ax,
             alpha=0.4, 
             facecolor="purple",
-            hatch="--"
+            hatch="--",
+            zorder=collection_ids["inflated_buildings"]
             )
+        
+        # Remove previouse ones 
+        ax.collections[collection_ids["buildings"]].remove() 
+
+        # Update collections id tracker -- buildings goes to last position 
+        for k,v in collection_ids.items(): 
+            if v > collection_ids["buildings"]: 
+                collection_ids[k] = v-1 
+        collection_ids["buildings"] = len(collection_ids)-1
+        
+        # Plot new ones 
+        building_plot = umap.buildings_gdfs.plot(
+            ax=ax,
+            column="height",
+            cmap="viridis",
+            label="Buildings",
+            edgecolor="black",
+            zorder=collection_ids["buildings"])
         
         plt.draw()
 
-    # connect slider 
-    ax_slider = plt.axes([0.5, 0.05, 0.4, 0.03])  # [left, bottom, width, height]
-    freq_slider = Slider(ax_slider, 'Inflate', 0.0, 10.0, valinit=0.0)
-    freq_slider.on_changed(merge_thr_update)
+    # Add a TextBox widget
+    axbox = plt.axes([0.4, 0.05, 0.1, 0.025])  # Position: [left, bottom, width, height]
+    text_box = TextBox(axbox, "inflate:", initial=str(0.0))
+    text_box.on_submit(merge_thr_update)  # Connect the event handler
 
     # Show the plot
     plt.show()

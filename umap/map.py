@@ -104,6 +104,7 @@ class Map:
         """ 
             Update the geodataframe of building shapes regarding 
             a new merging threshold applied to the raw geodataframe data.
+            NOTE: Take into account the buinding heights. --> move to extract functions ? 
         """
 
         self.buildings_gdfs = merge_nearby_buildings(self.raw_buildings_gdfs, new_merge_thr)
@@ -129,6 +130,12 @@ class Map:
         # Reproject back to the original CRS if needed
         # Assuming original CRS is WGS84 (EPSG:4326)
         self.inflated_buildings_gdfs = merged_gdf.to_crs(epsg=4326)  
+
+        # remove holes 
+        remove_holes_from_gdf(self.inflated_buildings_gdfs)
+
+
+
 
     def _compute_distance_with_elevation(self): 
         pass 

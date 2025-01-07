@@ -3,7 +3,6 @@ from umap import *
 import matplotlib.pyplot as plt
 
 
-# TEMPORARY DEBUG
 if __name__ == "__main__": 
 
     # reference point tls 
@@ -37,13 +36,11 @@ if __name__ == "__main__":
         lat=48.858234252317324
     )"""
     
-    
-    
-    # Isnitialize map 
-    umap = Map.init_from_request(reference_point, buffer_distance=1000.0, name=name, topography=True) 
+    # Initialize map 
+    """umap = Map.init_from_request(reference_point, buffer_distance=1000.0, name=name, topography=True) 
 
     # Export map 
-    umap.save()
+    umap.save()"""
 
     # Load a file
     umap:Map = Map.load(name)
@@ -54,5 +51,3 @@ if __name__ == "__main__":
 
     # Visualize map 
     plot(umap)
-
-    pass 
