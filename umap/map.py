@@ -5,6 +5,7 @@ from .elevation import Elevation
 from .network import Network
 
 import pickle
+from shapely.geometry import JOIN_STYLE
 
 class Map: 
     """ DOCME """
@@ -117,7 +118,8 @@ class Map:
         gdf_projected = self.raw_buildings_gdfs.to_crs(epsg=3395)
 
         # Now apply the buffer (inflating by 100 meters)
-        gdf_projected['geometry'] = gdf_projected['geometry'].buffer(inflate)
+        # gdf_projected['geometry'] = gdf_projected['geometry'].buffer(inflate, resolution=4)
+        gdf_projected['geometry'] = gdf_projected['geometry'].buffer(inflate, join_style=JOIN_STYLE.mitre)
 
         # If you need to bring the data back to its original geographic CRS
         gdf_projected = gdf_projected.to_crs(self.inflated_buildings_gdfs.crs)
@@ -134,6 +136,8 @@ class Map:
         # remove holes 
         remove_holes_from_gdf(self.inflated_buildings_gdfs)
 
+        #self.inflated_buildings_gdfs = self.inflated_buildings_gdfs.simplify(5e-5, preserve_topology=False)
+        #print(len(self.inflated_buildings_gdfs))
 
 
 

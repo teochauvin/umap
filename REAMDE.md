@@ -72,16 +72,26 @@ Few results of what you might expect from that.
 ![interface](examples/img/buffer2.png)
 
 
-## Build random mission scenarios 
+## Build random mission scenarios (experimental)
 
-Explain 
+Umap is designed to create urban realistic scenarios but also realistic missions. A mission is defined with a start point, an end point and a departure time. For now, missions are randomly drawn from POI (Point of Interest) and Poisson distribution for departure times. 
 
 
 ## Roadmap 
 
-### Further improvments 
+### Already done 
 
-Lot of ideas. 
+ENumerate functionalities 
 
+### Further improvments
 
-## Notes 
+**Simulate trajectories** : Given a set of trajectories, provide visualisation and metric compuation tools. The overall idea is to have the same scenarios and metric evaluation in order to later compare different algorithms. 
+
+**Connect with simulation tools** : Another project named *Usim* is designed to use Umap object to find trajectories using planning, detect and avoid, optimal control and heuristic algorithms. This project will be entirely focused on the computation part, the scenario generation, visualisation and metric computations relie on Umap. What metrics are interesting ? (LoS, lengths, )
+
+**Better missions** : We have to answer several questions. What are the different kind of missions ? (delivery, surveillance, passenger transport, industrial) And how to draw them from the map ? At the end, Umap should provide several way to create missions, with high diversity of UAVs (size, velocity, weight, autonomy, dynamics, etc.). 
+
+**Enhance mission description** : Mission should also describe the type of UAVs with all their properties. Start with 3 different sizes. Later we can try with a lot of different existing UAVs. 
+
+**Simplify geometry** : The building geometry should be as simple as possible in order to accelerate the simulation algorithms. A too complex environment make the computations slower. 
+

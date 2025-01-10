@@ -21,13 +21,13 @@ if __name__ == "__main__":
     """name = "paris"
     reference_point = MapPoint(
         lon=2.329298, 
-        lat=48.862928)
+        lat=48.862928)"""
     
     # 43.563971, 1.479148
     name = "enac"
     reference_point = MapPoint(
         lon=1.479148, 
-        lat=43.563971)"""
+        lat=43.563971)
     
     """48.858234252317324, 2.2941945479347217
     name = "eiffelTower"
@@ -36,6 +36,14 @@ if __name__ == "__main__":
         lat=48.858234252317324
     )"""
     
+    #43.58515828782924, 1.3437023753917743
+    """name = "tournefeuille"
+    reference_point = MapPoint(
+        lon=1.3437023753917743,
+        lat=43.58515828782924,
+    )
+"""
+
     # Initialize map 
     """umap = Map.init_from_request(reference_point, buffer_distance=1000.0, name=name, topography=True) 
 
